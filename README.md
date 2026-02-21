@@ -2,9 +2,12 @@
 
 Aplicación de carrito de compras desarrollada con Flutter, utilizando BLoC para gestión de estado y Clean Architecture para la organización del código.
 
+> **Repositorio**: https://github.com/fswebcoder/carrito_compras
+
 ## 🚀 Cómo ejecutar el proyecto
 
 ### Requisitos previos
+
 - Flutter SDK (^3.10.4)
 - Dart SDK
 - Dispositivo o emulador configurado
@@ -13,7 +16,7 @@ Aplicación de carrito de compras desarrollada con Flutter, utilizando BLoC para
 
 ```bash
 # Clonar el repositorio
-git clone <repository-url>
+git clone https://github.com/fswebcoder/carrito_compras.git
 
 # Navegar al directorio
 cd carrito_compras
@@ -83,43 +86,57 @@ Presentation → Domain ← Data
 ```
 
 Las dependencias apuntan hacia el dominio (Dependency Inversion), permitiendo:
+
 - Testabilidad mediante mocks
 - Desacoplamiento entre capas
 - Facilidad de mantenimiento
 
+### Contratos (Interfaces)
+
+| Contrato                  | Implementación                | Descripción                          |
+| ------------------------- | ----------------------------- | ------------------------------------ |
+| `ProductRepository`       | `ProductRepositoryImpl`       | Obtención de productos desde API     |
+| `CartRepository`          | `CartRepositoryImpl`          | Gestión del carrito con persistencia |
+| `ProductRemoteDataSource` | `ProductRemoteDataSourceImpl` | Llamadas HTTP a Fake Store API       |
+| `CartLocalDataSource`     | `CartLocalDataSourceImpl`     | Persistencia en SharedPreferences    |
+
 ## 📦 Dependencias principales
 
-| Paquete | Uso |
-|---------|-----|
-| `flutter_bloc` | Gestión de estado con patrón BLoC |
-| `equatable` | Comparación de objetos por valor |
-| `dartz` | Programación funcional (Either) |
-| `get_it` | Inyección de dependencias |
-| `shared_preferences` | Persistencia local |
-| `http` | Cliente HTTP para API |
-| `cached_network_image` | Caché de imágenes |
+| Paquete                | Uso                               |
+| ---------------------- | --------------------------------- |
+| `flutter_bloc`         | Gestión de estado con patrón BLoC |
+| `equatable`            | Comparación de objetos por valor  |
+| `dartz`                | Programación funcional (Either)   |
+| `get_it`               | Inyección de dependencias         |
+| `shared_preferences`   | Persistencia local                |
+| `http`                 | Cliente HTTP para API             |
+| `cached_network_image` | Caché de imágenes                 |
 
 ## 🎯 Decisiones clave
 
 ### Persistencia
+
 - **SharedPreferences** para almacenar el carrito en formato JSON
 - El carrito se carga automáticamente al iniciar la app
 - Cada modificación se persiste inmediatamente
 - Se eligió SharedPreferences por simplicidad; para datos más complejos se podría usar Hive o SQLite
 
 ### Navegación
+
 - **Navigator standard** de Flutter con rutas imperativas
 - Navegación push/pop entre pantallas
 - El carrito se accede tocando el ícono en el AppBar (no drawer)
 - PopUntil para volver al Home después del pago
 
 ### Manejo del contador global
+
 - **CartBloc como Singleton** registrado en GetIt
 - Un único BlocProvider a nivel de MaterialApp
 - Todas las pantallas acceden al mismo estado del carrito
 - Los cambios se reflejan inmediatamente en todas las pantallas
 
 ### Sincronización entre pantallas
+
 - BlocBuilder en cada pantalla observa el mismo CartBloc
 - Al modificar el carrito en cualquier pantalla, el estado se actualiza globalmente
 - El contador del AppBar se actualiza en tiempo real
@@ -146,21 +163,30 @@ Las dependencias apuntan hacia el dominio (Dependency Inversion), permitiendo:
 
 ## ✅ Pruebas unitarias
 
-Se incluyen tests para:
-- `CartBloc`: Eventos de cargar, agregar, eliminar, actualizar cantidad y limpiar
-- `ProductBloc`: Eventos de cargar y filtrar productos
-- `CartItem`: Cálculo de subtotal y copyWith
-- `ProductModel`: Serialización JSON
+**39 tests** cubriendo las capas de dominio, data y presentación:
+
+| Archivo                   | Cobertura                                                                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cart_bloc_test.dart`     | Eventos LoadCart, AddProduct, RemoveProduct, IncreaseQuantity, DecreaseQuantity, ClearCart. Estados CartLoaded (totalItems, totalPrice, isEmpty, containsProduct) |
+| `product_bloc_test.dart`  | Eventos LoadProducts, FilterByCategory, RefreshProducts. Manejo de errores                                                                                        |
+| `cart_item_test.dart`     | Cálculo de subtotal, copyWith, igualdad de objetos                                                                                                                |
+| `product_model_test.dart` | Serialización/deserialización JSON, conversión entity↔model                                                                                                       |
 
 ```bash
+# Ejecutar todas las pruebas
+flutter test
+
 # Ejecutar pruebas específicas
 flutter test test/features/cart/presentation/bloc/cart_bloc_test.dart
 flutter test test/features/products/presentation/bloc/product_bloc_test.dart
+flutter test test/features/cart/domain/entities/cart_item_test.dart
+flutter test test/features/products/data/models/product_model_test.dart
 ```
 
 ## 🔗 API
 
 Se utiliza [Fake Store API](https://fakestoreapi.com/) para obtener productos:
+
 - `GET /products` - Lista de productos
 - `GET /products/:id` - Producto individual
 - `GET /products/categories` - Categorías
@@ -168,4 +194,3 @@ Se utiliza [Fake Store API](https://fakestoreapi.com/) para obtener productos:
 ## 📄 Licencia
 
 Este proyecto fue desarrollado como prueba técnica.
-
